@@ -1,5 +1,6 @@
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { logAction } from './auditService';
 
 export const subscribeSettings = (callback) => {
     return onSnapshot(doc(db, 'settings', 'general'), (docSnap) => {
@@ -12,5 +13,7 @@ export const subscribeSettings = (callback) => {
 };
 
 export const updateSettings = async (data) => {
-    return await setDoc(doc(db, 'settings', 'general'), data, { merge: true });
+    const result = await setDoc(doc(db, 'settings', 'general'), data, { merge: true });
+    await logAction('UPDATE', 'SETTINGS', 'general', `Genel sistem ayarları güncellendi.`);
+    return result;
 };

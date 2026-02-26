@@ -1,5 +1,6 @@
 import { collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+import { logAction } from './auditService';
 
 export const subscribeCampaigns = (callback) => {
     return onSnapshot(collection(db, 'campaigns'), (snapshot) => {
@@ -10,13 +11,19 @@ export const subscribeCampaigns = (callback) => {
 };
 
 export const addCampaign = async (data) => {
-    return await addDoc(collection(db, 'campaigns'), { ...data, createdAt: serverTimestamp() });
+    const docRef = await addDoc(collection(db, 'campaigns'), { ...data, createdAt: serverTimestamp() });
+    await logAction('CREATE', 'CAMPAIGN', docRef.id, `Yeni kampanya eklendi: ${data.title}`);
+    return docRef;
 };
 
 export const updateCampaign = async (id, data) => {
-    return await setDoc(doc(db, 'campaigns', id), data, { merge: true });
+    const result = await setDoc(doc(db, 'campaigns', id), data, { merge: true });
+    await logAction('UPDATE', 'CAMPAIGN', id, `Kampanya güncellendi.`);
+    return result;
 };
 
 export const deleteCampaign = async (id) => {
-    return await deleteDoc(doc(db, 'campaigns', id));
+    const result = await deleteDoc(doc(db, 'campaigns', id));
+    await logAction('DELETE', 'CAMPAIGN', id, `Kampanya silindi.`);
+    return result;
 };

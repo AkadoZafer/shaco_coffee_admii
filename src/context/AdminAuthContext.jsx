@@ -9,17 +9,17 @@ export function AdminAuthProvider({ children }) {
     const [adminUser, setAdminUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const logout = () => signOut(auth);
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Sadece role === 'admin' kontrolü
                 const userDocRef = doc(db, 'users', user.uid);
                 const userDocSnap = await getDoc(userDocRef);
 
                 if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
                     setAdminUser({ uid: user.uid, email: user.email, ...userDocSnap.data() });
                 } else {
-                    // Admin değilse hesaptan çık
                     await signOut(auth);
                     setAdminUser(null);
                 }
@@ -31,6 +31,34 @@ export function AdminAuthProvider({ children }) {
 
         return unsubscribe;
     }, []);
+
+    // Idle Timeout Mekanizması (30 Dakika)
+    useEffect(() => {
+        let timeoutId;
+
+        const resetTimeout = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            // 30 dakika (30 * 60 * 1000 ms)
+            timeoutId = setTimeout(() => {
+                if (adminUser) {
+                    logout();
+                    alert("Oturum süreniz doldu. Hareketsizlik sebebiyle güvenliğiniz için otomatik olarak çıkış yapıldı.");
+                }
+            }, 30 * 60 * 1000);
+        };
+
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+
+        if (adminUser) {
+            resetTimeout();
+            events.forEach(e => window.addEventListener(e, resetTimeout));
+        }
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            events.forEach(e => window.removeEventListener(e, resetTimeout));
+        };
+    }, [adminUser]);
 
     const login = async (email, password) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -47,8 +75,6 @@ export function AdminAuthProvider({ children }) {
             throw new Error('Bu panele erişim yetkiniz (admin) bulunmuyor.');
         }
     };
-
-    const logout = () => signOut(auth);
 
     const value = { adminUser, loading, login, logout };
 

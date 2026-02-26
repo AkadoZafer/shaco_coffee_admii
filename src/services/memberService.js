@@ -1,5 +1,6 @@
 import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { logAction } from './auditService';
 
 export const subscribeMembers = (callback) => {
     return onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -14,14 +15,20 @@ export const subscribeMembers = (callback) => {
 };
 
 export const updateMemberTier = async (id, newTier) => {
-    return await setDoc(doc(db, 'users', id), { tier: newTier }, { merge: true });
+    const result = await setDoc(doc(db, 'users', id), { tier: newTier }, { merge: true });
+    await logAction('UPDATE', 'MEMBER', id, `Üye tier seviyesi ${newTier} olarak değiştirildi.`);
+    return result;
 };
 
 export const updateMemberBalance = async (id, newBalance) => {
-    return await setDoc(doc(db, 'users', id), { balance: newBalance }, { merge: true });
+    const result = await setDoc(doc(db, 'users', id), { balance: newBalance }, { merge: true });
+    await logAction('UPDATE', 'MEMBER', id, `Üyenin yıldız bakiyesi ${newBalance} olarak güncellendi.`);
+    return result;
 };
 
 export const deleteMember = async (id) => {
     // Sadece admin yetkisi olan bu işlemi yapabilir
-    return await deleteDoc(doc(db, 'users', id));
+    const result = await deleteDoc(doc(db, 'users', id));
+    await logAction('DELETE', 'MEMBER', id, `Üye kaydı silindi.`);
+    return result;
 };

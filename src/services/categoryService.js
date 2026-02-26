@@ -1,5 +1,6 @@
 import { collection, doc, addDoc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { logAction } from './auditService';
 
 export const subscribeCategories = (callback) => {
     return onSnapshot(collection(db, 'categories'), (snapshot) => {
@@ -10,13 +11,19 @@ export const subscribeCategories = (callback) => {
 };
 
 export const addCategory = async (data) => {
-    return await addDoc(collection(db, 'categories'), data);
+    const docRef = await addDoc(collection(db, 'categories'), data);
+    await logAction('CREATE', 'CATEGORY', docRef.id, `Yeni kategori eklendi: ${data.name}`);
+    return docRef;
 };
 
 export const updateCategory = async (id, data) => {
-    return await setDoc(doc(db, 'categories', id), data, { merge: true });
+    const result = await setDoc(doc(db, 'categories', id), data, { merge: true });
+    await logAction('UPDATE', 'CATEGORY', id, `Kategori güncellendi.`);
+    return result;
 };
 
 export const deleteCategory = async (id) => {
-    return await deleteDoc(doc(db, 'categories', id));
+    const result = await deleteDoc(doc(db, 'categories', id));
+    await logAction('DELETE', 'CATEGORY', id, `Kategori silindi.`);
+    return result;
 };
