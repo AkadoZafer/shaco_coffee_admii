@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-shaco-red: #ef4444;
+}
+
+body {
+  background-color: #050505;
+  color: #ededed;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+@utility glass {
+  background: rgba(24, 24, 27, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
