@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { subscribeCampaigns, addCampaign, updateCampaign, deleteCampaign } from '../services/campaignService';
-import { Megaphone, Trash2, Plus, CheckCircle, XCircle } from 'lucide-react';
+import { Megaphone, Trash2, Plus, CheckCircle, XCircle, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AdminCampaigns() {
@@ -33,6 +33,12 @@ export default function AdminCampaigns() {
 
     const toggleCampaignStatus = async (id, currentStatus) => {
         try { await updateCampaign(id, { isActive: !currentStatus }); } catch (e) { alert('Hata: ' + e.message); }
+    };
+
+    const sendNotification = (campaign) => {
+        // İleride Firebase Cloud Functions (FCM) üzerinden push atılacak.
+        alert(`FCM (Push Notification) Kuyruğuna Eklendi!\n\nBaşlık: ${campaign.title}\nMesaj: ${campaign.subtitle}\n\nTüm mobil kullanıcılara bildirim gönderiliyor...`);
+        console.log("FCM Payload:", { title: campaign.title, body: campaign.subtitle, data: { campaignId: campaign.id } });
     };
 
     const gradients = [
@@ -108,6 +114,7 @@ export default function AdminCampaigns() {
                                     {campaign.emoji}
                                 </div>
                                 <div className="flex gap-2">
+                                    <button onClick={() => sendNotification(campaign)} className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/40 transition-all" title="Tüm Üyelere Push Bildirim Gönder"><Bell size={16} /></button>
                                     <button onClick={() => toggleCampaignStatus(campaign.id, campaign.isActive)} className={`w-8 h-8 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/20 transition-all ${campaign.isActive ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`} title={campaign.isActive ? 'Yayından Kaldır' : 'Yayına Al'}><CheckCircle size={16} /></button>
                                     <button onClick={() => handleDeleteCampaign(campaign.id)} className="w-8 h-8 rounded-lg flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 text-zinc-300 hover:bg-red-500/40 hover:text-white hover:border-red-500/50 transition-all"><Trash2 size={16} /></button>
                                 </div>

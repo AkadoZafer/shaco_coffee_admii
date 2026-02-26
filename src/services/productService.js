@@ -1,5 +1,6 @@
 import { collection, doc, addDoc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { logAction } from './auditService';
 
 // Not: Mobil uygulamada koleksiyon adı 'menu' olarak kullanılıyor, o nedenle burada da 'menu' ile bağlanıyoruz.
 export const subscribeProducts = (callback) => {
@@ -11,13 +12,19 @@ export const subscribeProducts = (callback) => {
 };
 
 export const addProduct = async (data) => {
-    return await addDoc(collection(db, 'menu'), data);
+    const docRef = await addDoc(collection(db, 'menu'), data);
+    await logAction('CREATE', 'PRODUCT', docRef.id, `Yeni ürün eklendi: ${data.name}`);
+    return docRef;
 };
 
 export const updateProduct = async (id, data) => {
-    return await setDoc(doc(db, 'menu', id), data, { merge: true });
+    const result = await setDoc(doc(db, 'menu', id), data, { merge: true });
+    await logAction('UPDATE', 'PRODUCT', id, `Ürün güncellendi.`);
+    return result;
 };
 
 export const deleteProduct = async (id) => {
-    return await deleteDoc(doc(db, 'menu', id));
+    const result = await deleteDoc(doc(db, 'menu', id));
+    await logAction('DELETE', 'PRODUCT', id, `Ürün silindi.`);
+    return result;
 };

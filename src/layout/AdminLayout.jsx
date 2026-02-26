@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
-import { Coffee, LayoutDashboard, Package, ListTree, Megaphone, ImagePlay, Users, MapPin, Settings, LogOut } from 'lucide-react';
+import { Coffee, LayoutDashboard, Package, ListTree, Megaphone, ImagePlay, Users, MapPin, Settings, LogOut, Shield } from 'lucide-react';
 
 export default function AdminLayout() {
     const { logout, adminUser } = useAdminAuth();
@@ -14,6 +14,7 @@ export default function AdminLayout() {
         { path: '/stories', label: 'Story Yönetimi', icon: ImagePlay },
         { path: '/members', label: 'Üye Yönetimi', icon: Users },
         { path: '/branch', label: 'Şube & Saatler', icon: MapPin },
+        { path: '/audit', label: 'Denetim Günlüğü', icon: Shield },
         { path: '/settings', label: 'Ayarlar', icon: Settings },
     ];
 

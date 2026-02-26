@@ -13,6 +13,7 @@ import AdminStories from './pages/AdminStories';
 import AdminMembers from './pages/AdminMembers';
 import AdminBranches from './pages/AdminBranches';
 import AdminSettings from './pages/AdminSettings';
+import AdminAudit from './pages/AdminAudit';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               <Route path="members" element={<AdminMembers />} />
               <Route path="branch" element={<AdminBranches />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="audit" element={<AdminAudit />} />
             </Route>
           </Route>
 
