@@ -213,10 +213,15 @@ export default function AdminProducts() {
                                 <div className="border-t border-white/5 pt-6">
                                     <h3 className="text-sm font-bold text-shaco-red uppercase tracking-widest mb-4">Gelişmiş Bilgiler</h3>
                                     <div className="grid grid-cols-4 gap-4 mb-4">
-                                        {['calories', 'caffeine', 'protein', 'carbs'].map(field => (
-                                            <div key={field}>
-                                                <label className="block text-[10px] text-zinc-500 mb-1 uppercase">{field}</label>
-                                                <input type="number" value={selectedProduct.nutrition?.[field] || ''} onChange={(e) => handleNutritionChange(field, e.target.value)} className="w-full bg-black border border-white/10 rounded-lg py-1.5 px-2 text-white outline-none text-sm" />
+                                        {[
+                                            { key: 'calories', label: 'Kalori' },
+                                            { key: 'caffeine', label: 'Kafein' },
+                                            { key: 'protein', label: 'Protein' },
+                                            { key: 'carbs', label: 'Karbonhidrat' }
+                                        ].map(field => (
+                                            <div key={field.key}>
+                                                <label className="block text-[10px] text-zinc-500 mb-1 uppercase">{field.label}</label>
+                                                <input type="number" value={selectedProduct.nutrition?.[field.key] || ''} onChange={(e) => handleNutritionChange(field.key, e.target.value)} className="w-full bg-black border border-white/10 rounded-lg py-1.5 px-2 text-white outline-none text-sm" />
                                             </div>
                                         ))}
                                     </div>
