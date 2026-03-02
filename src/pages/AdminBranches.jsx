@@ -19,6 +19,7 @@ export default function AdminBranches() {
             address: '',
             phone: '',
             isOpen: true,
+            location: { lat: '', lng: '' },
             hours: {
                 weekdays: { open: '08:00', close: '22:00' },
                 weekends: { open: '09:00', close: '23:00' }
@@ -28,7 +29,7 @@ export default function AdminBranches() {
     };
 
     const handleSelectBranch = (branch) => {
-        setSelectedBranch({ ...branch });
+        setSelectedBranch({ location: { lat: '', lng: '' }, ...branch });
         setIsEditing(true);
     };
 
@@ -47,10 +48,31 @@ export default function AdminBranches() {
         }));
     };
 
+    const handleLocationChange = (coord, value) => {
+        setSelectedBranch(prev => ({
+            ...prev,
+            location: {
+                ...prev.location,
+                [coord]: value
+            }
+        }));
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         try {
             const { isNew, id, ...dataToSave } = selectedBranch;
+
+            if (dataToSave.location) {
+                const lat = parseFloat(dataToSave.location.lat);
+                const lng = parseFloat(dataToSave.location.lng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    dataToSave.location = { lat, lng };
+                } else {
+                    dataToSave.location = null;
+                }
+            }
+
             if (isNew) {
                 await addBranch(dataToSave);
             } else {
@@ -114,6 +136,18 @@ export default function AdminBranches() {
                                     <label className="block text-xs font-bold text-zinc-400 mb-2 uppercase">Açık Adres</label>
                                     <textarea name="address" value={selectedBranch.address || ''} onChange={handleChange} rows="2" required className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-shaco-red outline-none"></textarea>
                                 </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-xs font-bold text-zinc-400 mb-2 uppercase">Enlem (Latitude)</label>
+                                        <input type="number" step="any" value={selectedBranch.location?.lat || ''} onChange={(e) => handleLocationChange('lat', e.target.value)} placeholder="37.8234" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-shaco-red outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-zinc-400 mb-2 uppercase">Boylam (Longitude)</label>
+                                        <input type="number" step="any" value={selectedBranch.location?.lng || ''} onChange={(e) => handleLocationChange('lng', e.target.value)} placeholder="32.4891" className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-shaco-red outline-none" />
+                                    </div>
+                                </div>
+                                <p className="text-xs text-zinc-500 mt-1">Google Maps'te konuma sağ tıklayarak koordinatları kopyalayabilirsiniz.</p>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="bg-black/30 p-4 rounded-xl border border-white/5">
