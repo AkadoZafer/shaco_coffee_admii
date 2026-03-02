@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { throttle } from 'lodash';
 
 const AdminAuthContext = createContext();
 
@@ -38,25 +39,28 @@ export function AdminAuthProvider({ children }) {
 
         const resetTimeout = () => {
             if (timeoutId) clearTimeout(timeoutId);
-            // 30 dakika (30 * 60 * 1000 ms)
             timeoutId = setTimeout(() => {
                 if (adminUser) {
                     logout();
-                    alert("Oturum süreniz doldu. Hareketsizlik sebebiyle güvenliğiniz için otomatik olarak çıkış yapıldı.");
+                    // Alert yerine console ve custom ui (gerekirse entegre edilebilir ama bloklamaması için basit setTimeout)
+                    setTimeout(() => alert("Oturum süreniz doldu. Hareketsizlik sebebiyle otomatik olarak çıkış yapıldı."), 500);
                 }
-            }, 30 * 60 * 1000);
+            }, 30 * 60 * 1000); // 30 dakika
         };
 
         const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
 
+        // Throttled event listener (performans için)
+        const throttledReset = throttle(resetTimeout, 1000);
+
         if (adminUser) {
             resetTimeout();
-            events.forEach(e => window.addEventListener(e, resetTimeout));
+            events.forEach(e => window.addEventListener(e, throttledReset));
         }
 
         return () => {
             if (timeoutId) clearTimeout(timeoutId);
-            events.forEach(e => window.removeEventListener(e, resetTimeout));
+            events.forEach(e => window.removeEventListener(e, throttledReset));
         };
     }, [adminUser]);
 
