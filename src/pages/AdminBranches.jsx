@@ -20,9 +20,9 @@ export default function AdminBranches() {
             phone: '',
             isOpen: true,
             location: { lat: '', lng: '' },
-            hours: {
+            workingHours: {
                 weekdays: { open: '08:00', close: '22:00' },
-                weekends: { open: '09:00', close: '23:00' }
+                weekend: { open: '09:00', close: '23:00' }
             }
         });
         setIsEditing(true);
@@ -41,9 +41,9 @@ export default function AdminBranches() {
     const handleHoursChange = (dayType, timeType, value) => {
         setSelectedBranch(prev => ({
             ...prev,
-            hours: {
-                ...prev.hours,
-                [dayType]: { ...prev.hours[dayType], [timeType]: value }
+            workingHours: {
+                ...prev.workingHours,
+                [dayType]: { ...prev.workingHours?.[dayType], [timeType]: value }
             }
         }));
     };
@@ -155,11 +155,11 @@ export default function AdminBranches() {
                                         <div className="flex gap-4">
                                             <div>
                                                 <label className="block text-[10px] text-zinc-500 mb-1">Açılış</label>
-                                                <input type="time" value={selectedBranch.hours?.weekdays?.open || ''} onChange={(e) => handleHoursChange('weekdays', 'open', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
+                                                <input type="time" value={selectedBranch.workingHours?.weekdays?.open || ''} onChange={(e) => handleHoursChange('weekdays', 'open', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] text-zinc-500 mb-1">Kapanış</label>
-                                                <input type="time" value={selectedBranch.hours?.weekdays?.close || ''} onChange={(e) => handleHoursChange('weekdays', 'close', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
+                                                <input type="time" value={selectedBranch.workingHours?.weekdays?.close || ''} onChange={(e) => handleHoursChange('weekdays', 'close', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
                                             </div>
                                         </div>
                                     </div>
@@ -168,11 +168,11 @@ export default function AdminBranches() {
                                         <div className="flex gap-4">
                                             <div>
                                                 <label className="block text-[10px] text-zinc-500 mb-1">Açılış</label>
-                                                <input type="time" value={selectedBranch.hours?.weekends?.open || ''} onChange={(e) => handleHoursChange('weekends', 'open', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
+                                                <input type="time" value={selectedBranch.workingHours?.weekend?.open || ''} onChange={(e) => handleHoursChange('weekend', 'open', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] text-zinc-500 mb-1">Kapanış</label>
-                                                <input type="time" value={selectedBranch.hours?.weekends?.close || ''} onChange={(e) => handleHoursChange('weekends', 'close', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
+                                                <input type="time" value={selectedBranch.workingHours?.weekend?.close || ''} onChange={(e) => handleHoursChange('weekend', 'close', e.target.value)} className="bg-black border border-white/10 rounded-lg p-2 text-white text-sm outline-none" />
                                             </div>
                                         </div>
                                     </div>
