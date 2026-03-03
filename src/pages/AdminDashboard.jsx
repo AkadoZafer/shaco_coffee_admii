@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { subscribeProducts } from '../services/productService';
 import { subscribeMembers } from '../services/memberService';
 import { subscribeCampaigns } from '../services/campaignService';
+import SeedButton from '../components/SeedButton';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({ products: 0, members: 0, campaigns: 0, outOfStock: 0 });
@@ -20,9 +21,12 @@ export default function AdminDashboard() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-white tracking-wide">Genel Bakış</h1>
-                <p className="text-zinc-400 mt-1">Sistem istatistikleri ve genel raporlar (Simüle edilmiş veriler ve canlı sayımlar).</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold text-white tracking-wide">Genel Bakış</h1>
+                    <p className="text-zinc-400 mt-1">Sistem istatistikleri ve genel raporlar (Simüle edilmiş veriler ve canlı sayımlar).</p>
+                </div>
+                <SeedButton />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

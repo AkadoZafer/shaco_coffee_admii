@@ -2,15 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { subscribeProducts, addProduct, updateProduct, deleteProduct } from '../services/productService';
 import { Coffee, Plus, Save, Trash2, Edit2, X, Image as ImageIcon, Info } from 'lucide-react';
 
-const categories = [
-    { label: '☕ Sıcak Kahve', value: 'cat_coffee' },
-    { label: '🧊 Soğuk İçecek', value: 'cat_cold' },
-    { label: '🍰 Tatlı & Yiyecek', value: 'cat_food' },
-    { label: '🍪 Atıştırmalık', value: 'cat_snacks' },
-];
+import { subscribeCategories } from '../services/categoryService';
 
 export default function AdminProducts() {
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('ALL');
@@ -20,11 +16,22 @@ export default function AdminProducts() {
     const fileInputRef = useRef(null);
 
     useEffect(() => {
-        const unsub = subscribeProducts((data) => {
+        let unsubProducts = null;
+        let unsubCategories = null;
+
+        unsubCategories = subscribeCategories((catData) => {
+            setCategories(catData);
+        });
+
+        unsubProducts = subscribeProducts((data) => {
             setProducts(data);
             setIsLoading(false);
         });
-        return () => unsub();
+
+        return () => {
+            if (unsubProducts) unsubProducts();
+            if (unsubCategories) unsubCategories();
+        };
     }, []);
 
     const handleNewProduct = () => {
