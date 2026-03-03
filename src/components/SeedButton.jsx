@@ -42,6 +42,9 @@ export default function SeedButton() {
                 { name: 'Caffé Mocha', category: 'cat_espresso_based', price: 204, sizes: [{ name: 'Küçük', price: 204 }, { name: 'Orta', price: 214 }, { name: 'Büyük', price: 224 }] },
                 { name: 'Hot Chocolate', category: 'cat_espresso_based', price: 194, sizes: [{ name: 'Küçük', price: 194 }, { name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
                 { name: 'Türk Kahvesi', category: 'cat_espresso_based', price: 95, sizes: [{ name: 'Küçük', price: 95 }, { name: 'Orta', price: 100 }] },
+                { name: 'Latte', category: 'cat_espresso_based', price: 165, sizes: [{ name: 'Küçük', price: 165 }, { name: 'Orta', price: 175 }, { name: 'Büyük', price: 185 }] },
+                { name: 'Americano', category: 'cat_espresso_based', price: 145, sizes: [{ name: 'Küçük', price: 145 }, { name: 'Orta', price: 155 }, { name: 'Büyük', price: 165 }] },
+                { name: 'White Chocolate Mocha', category: 'cat_espresso_based', price: 204, sizes: [{ name: 'Küçük', price: 204 }, { name: 'Orta', price: 214 }, { name: 'Büyük', price: 224 }] },
 
                 // TEA BASED
                 { name: 'Çay', category: 'cat_tea_based', price: 50, sizes: [{ name: 'Küçük', price: 50 }, { name: 'Orta', price: 70 }, { name: 'Büyük', price: 90 }] },
@@ -54,15 +57,26 @@ export default function SeedButton() {
                 { name: 'Cookie Latte', category: 'cat_special_lattes', price: 204, sizes: [{ name: 'Küçük', price: 204 }, { name: 'Orta', price: 214 }, { name: 'Büyük', price: 224 }] },
                 { name: 'Bounty Latte', category: 'cat_special_lattes', price: 204, sizes: [{ name: 'Küçük', price: 204 }, { name: 'Orta', price: 214 }, { name: 'Büyük', price: 224 }] },
                 { name: 'Aromatic Latte', category: 'cat_special_lattes', price: 204, shortDesc: 'Hazelnut - Caramel - Vanilla - Salted Caramel', sizes: [{ name: 'Küçük', price: 204 }, { name: 'Orta', price: 214 }, { name: 'Büyük', price: 224 }] },
+                { name: 'Antep Fıstıklı Latte', category: 'cat_special_lattes', price: 214, sizes: [{ name: 'Orta', price: 214 }, { name: 'Büyük', price: 224 }] },
+                { name: 'Lavender Matcha Latte', category: 'cat_special_lattes', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
 
                 // SHACO SPECIAL
                 { name: 'Mango Dragon', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
                 { name: 'Frozen', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
                 { name: 'Portakal Suyu', category: 'cat_shaco_special', price: 165, sizes: [{ name: 'Orta', price: 165 }, { name: 'Büyük', price: 175 }] },
+                { name: 'Strawberry Acai', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
+                { name: 'Ocean Shine', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
+                { name: 'Tropical Shine', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
+                { name: 'Lemonade Mango Matcha', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
+                { name: 'Strawberry Matcha Latte', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
+                { name: 'Lavender Pink Matcha', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
+                { name: 'Passion Pop Bubble Tea', category: 'cat_shaco_special', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
 
                 // SHACOCHINO
                 { name: 'Chocolate Milkshake', category: 'cat_shacochino', price: 204, sizes: [{ name: 'Orta', price: 204 }, { name: 'Büyük', price: 214 }] },
                 { name: 'Blue Biscuit', category: 'cat_shacochino', price: 205, sizes: [{ name: 'Orta', price: 205 }, { name: 'Büyük', price: 215 }] },
+                { name: 'Caramel Shacochino', category: 'cat_shacochino', price: 205, sizes: [{ name: 'Orta', price: 205 }, { name: 'Büyük', price: 215 }] },
+                { name: 'Oreo Shacochino', category: 'cat_shacochino', price: 205, sizes: [{ name: 'Orta', price: 205 }, { name: 'Büyük', price: 215 }] },
 
                 // EXTRAS
                 { name: 'Extra Espresso', category: 'cat_extras', price: 40, sizes: [{ name: 'Tek Boy', price: 40 }] },
