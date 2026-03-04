@@ -49,5 +49,15 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Backend (Fastify Admin SDK) tarafından yönetilen koleksiyonlar
+    // Client (Web App/Admin Panel) tarafında doğrudan Okuma/Yazma KESİNLİKLE YASAKTIR.
+    match /qr_tokens/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /audit_logs/{document=**} {
+       allow read, write: if false;
+    }
   }
 }
