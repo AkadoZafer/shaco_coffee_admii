@@ -19,10 +19,13 @@ service cloud.firestore {
                     && request.auth.uid == userId
                     && (!('role' in request.resource.data) || request.resource.data.role != 'admin');
                     
-      // Kullanıcı dökümanını güncelleyebilir ama 'role' alanına DOKUNAMAZ!
+      // Kullanıcı dökümanını güncelleyebilir ama kritik alanlara DOKUNAMAZ!
+      // role: Yetki yükseltme saldırısı engeli
+      // balance: Bakiye manipülasyonu engeli
+      // stars / tier: Sadakat programı hilesi engeli
       allow update: if request.auth != null 
                     && request.auth.uid == userId
-                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'balance', 'stars', 'tier']));
     }
 
     match /menu/{document=**} {
