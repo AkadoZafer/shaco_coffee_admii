@@ -57,7 +57,8 @@ service cloud.firestore {
     }
 
     match /audit_logs/{document=**} {
-       allow read, write: if false;
+       allow read: if isAdmin();
+       allow write: if isAdmin();
     }
   }
 }
