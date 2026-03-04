@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
-import { Coffee, LayoutDashboard, Package, ListTree, Megaphone, ImagePlay, Users, MapPin, Settings, LogOut, Shield } from 'lucide-react';
+import { Coffee, LayoutDashboard, Package, ListTree, Megaphone, ImagePlay, Users, MapPin, Settings, LogOut, Shield, Camera } from 'lucide-react';
 
 export default function AdminLayout() {
     const { logout, adminUser } = useAdminAuth();
@@ -8,6 +8,7 @@ export default function AdminLayout() {
 
     const menuItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { path: '/qr-pay', label: 'QR Tahsilat', icon: Camera },
         { path: '/products', label: 'Ürün Yönetimi', icon: Package },
         { path: '/categories', label: 'Kategoriler', icon: ListTree },
         { path: '/campaigns', label: 'Kampanyalar', icon: Megaphone },
