@@ -8,7 +8,6 @@ export default function AdminLayout() {
 
     const menuItems = [
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/qr-pay', label: 'QR Tahsilat', icon: Camera },
         { path: '/products', label: 'Ürün Yönetimi', icon: Package },
         { path: '/categories', label: 'Kategoriler', icon: ListTree },
         { path: '/campaigns', label: 'Kampanyalar', icon: Megaphone },

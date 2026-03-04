@@ -14,7 +14,7 @@ import AdminMembers from './pages/AdminMembers';
 import AdminBranches from './pages/AdminBranches';
 import AdminSettings from './pages/AdminSettings';
 import AdminAudit from './pages/AdminAudit';
-import AdminQRPay from './pages/AdminQRPay';
+
 
 function App() {
   return (
@@ -37,7 +37,7 @@ function App() {
               <Route path="branch" element={<AdminBranches />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="audit" element={<AdminAudit />} />
-              <Route path="qr-pay" element={<AdminQRPay />} />
+
             </Route>
           </Route>
 
