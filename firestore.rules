@@ -17,7 +17,7 @@ service cloud.firestore {
       // Kullanıcı kendi dökümanını yaratabilir ama 'admin' rolünü koyamaz
       allow create: if request.auth != null 
                     && request.auth.uid == userId
-                    && (!('role' in request.resource.data) || request.resource.data.role != 'admin');
+                    && request.resource.data.role != 'admin';
                     
       // Kullanıcı dökümanını güncelleyebilir ama kritik alanlara DOKUNAMAZ!
       // role: Yetki yükseltme saldırısı engeli
