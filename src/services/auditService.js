@@ -1,7 +1,7 @@
 import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
 
-const AUDIT_COLLECTION = 'audit_logs';
+const AUDIT_COLLECTION = 'auditLogs';
 
 export const logAction = async (actionType, entityType, entityId, details = '') => {
     try {
