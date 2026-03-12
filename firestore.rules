@@ -64,6 +64,11 @@ service cloud.firestore {
        allow write: if isAdmin();
     }
 
+    match /error_logs/{document=**} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
     // Sipariş koleksiyonu — kullanıcı kendi siparişlerini görebilir, admin hepsini görebilir
     match /orders/{orderId} {
       allow read: if request.auth != null;
