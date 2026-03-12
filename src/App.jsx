@@ -17,11 +17,13 @@ import AdminAudit from './pages/AdminAudit';
 import AdminFeedbacks from './pages/AdminFeedbacks';
 
 function App() {
+  const allowAdminSetup = import.meta.env.DEV || import.meta.env.VITE_ENABLE_ADMIN_SETUP === 'true';
+
   return (
     <AdminAuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/setup" element={<AdminSetup />} />
+          <Route path="/setup" element={allowAdminSetup ? <AdminSetup /> : <Navigate to="/login" replace />} />
           <Route path="/login" element={<AdminLogin />} />
 
           {/* Protected Admin Routes */}

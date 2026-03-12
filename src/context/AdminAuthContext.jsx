@@ -14,20 +14,31 @@ export function AdminAuthProvider({ children }) {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDocSnap = await getDoc(userDocRef);
+            try {
+                if (user) {
+                    const userDocRef = doc(db, 'users', user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
 
-                if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
-                    setAdminUser({ uid: user.uid, email: user.email, ...userDocSnap.data() });
+                    if (userDocSnap.exists() && userDocSnap.data().role === 'admin') {
+                        setAdminUser({ uid: user.uid, email: user.email, ...userDocSnap.data() });
+                    } else {
+                        await signOut(auth);
+                        setAdminUser(null);
+                    }
                 } else {
-                    await signOut(auth);
                     setAdminUser(null);
                 }
-            } else {
+            } catch (error) {
+                console.error('Admin auth doğrulama hatası:', error);
                 setAdminUser(null);
+                try {
+                    await signOut(auth);
+                } catch (_) {
+                    // noop
+                }
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return unsubscribe;
