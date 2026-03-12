@@ -15,6 +15,7 @@ import AdminBranches from './pages/AdminBranches';
 import AdminSettings from './pages/AdminSettings';
 import AdminAudit from './pages/AdminAudit';
 import AdminFeedbacks from './pages/AdminFeedbacks';
+import AdminErrors from './pages/AdminErrors';
 
 function App() {
   const allowAdminSetup = import.meta.env.DEV || import.meta.env.VITE_ENABLE_ADMIN_SETUP === 'true';
@@ -40,6 +41,7 @@ function App() {
               <Route path="settings" element={<AdminSettings />} />
               <Route path="audit" element={<AdminAudit />} />
               <Route path="feedbacks" element={<AdminFeedbacks />} />
+              <Route path="errors" element={<AdminErrors />} />
 
             </Route>
           </Route>
