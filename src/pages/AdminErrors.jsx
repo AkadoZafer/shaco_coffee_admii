@@ -3,22 +3,22 @@ import { AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import { getErrorLogs, updateErrorResolved } from '../services/errorService';
 
 const SOURCE_OPTIONS = [
-    { value: 'all', label: 'All Sources' },
-    { value: 'app', label: 'App' },
-    { value: 'admin', label: 'Admin' },
+    { value: 'all', label: 'Tum Kaynaklar' },
+    { value: 'app', label: 'Uygulama' },
+    { value: 'admin', label: 'Admin Paneli' },
     { value: 'backend', label: 'Backend' }
 ];
 
 const SEVERITY_OPTIONS = [
-    { value: 'all', label: 'All Severities' },
-    { value: 'error', label: 'Error' },
-    { value: 'warning', label: 'Warning' }
+    { value: 'all', label: 'Tum Seviyeler' },
+    { value: 'error', label: 'Hata' },
+    { value: 'warning', label: 'Uyari' }
 ];
 
 const RESOLUTION_OPTIONS = [
-    { value: 'all', label: 'All Statuses' },
-    { value: 'open', label: 'Open' },
-    { value: 'resolved', label: 'Resolved' }
+    { value: 'all', label: 'Tum Durumlar' },
+    { value: 'open', label: 'Acik' },
+    { value: 'resolved', label: 'Cozuldu' }
 ];
 
 export default function AdminErrors() {
@@ -86,16 +86,16 @@ export default function AdminErrors() {
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2 flex items-center gap-3">
                         <AlertTriangle className="text-shaco-red" size={30} />
-                        Error Logs
+                        Hata Kayitlari
                     </h1>
-                    <p className="text-zinc-400 font-medium">Runtime incidents from app, admin, and backend.</p>
+                    <p className="text-zinc-400 font-medium">Uygulama, admin paneli ve backend kaynakli calisma zamani hatalari.</p>
                 </div>
                 <button
                     onClick={loadLogs}
                     className="bg-zinc-900 border border-white/10 hover:border-shaco-red text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-2 self-start md:self-auto"
                 >
                     <RefreshCw size={16} />
-                    Refresh
+                    Yenile
                 </button>
             </div>
 
@@ -133,7 +133,7 @@ export default function AdminErrors() {
                 <input
                     value={filters.search}
                     onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-                    placeholder="Search message, route, user..."
+                    placeholder="Mesaj, rota, kullanici ara..."
                     className="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:col-span-2"
                 />
             </form>
@@ -143,12 +143,12 @@ export default function AdminErrors() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-black/40 border-b border-white/5 text-xs uppercase tracking-wider text-zinc-500 font-bold">
-                                <th className="p-4 pl-6">Date</th>
-                                <th className="p-4">Source</th>
-                                <th className="p-4">Severity</th>
-                                <th className="p-4">Message</th>
-                                <th className="p-4">Route</th>
-                                <th className="p-4">Resolved</th>
+                                <th className="p-4 pl-6">Tarih</th>
+                                <th className="p-4">Kaynak</th>
+                                <th className="p-4">Seviye</th>
+                                <th className="p-4">Mesaj</th>
+                                <th className="p-4">Rota</th>
+                                <th className="p-4">Durum</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -156,13 +156,13 @@ export default function AdminErrors() {
                                 <tr>
                                     <td colSpan="6" className="p-12 text-center text-zinc-500">
                                         <Loader2 size={32} className="animate-spin mx-auto mb-4 text-shaco-red" />
-                                        Loading logs...
+                                        Kayitlar yukleniyor...
                                     </td>
                                 </tr>
                             ) : logs.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="p-12 text-center text-zinc-500">
-                                        No error logs found for selected filters.
+                                        Secilen filtrelere uygun hata kaydi bulunamadi.
                                     </td>
                                 </tr>
                             ) : (
@@ -195,7 +195,7 @@ export default function AdminErrors() {
                                                     : 'bg-zinc-900 border-white/10 text-zinc-200 hover:border-shaco-red'
                                                     } disabled:opacity-60`}
                                             >
-                                                {updatingIds[log.id] ? '...' : log.resolved ? 'Resolved' : 'Open'}
+                                                {updatingIds[log.id] ? '...' : log.resolved ? 'Cozuldu' : 'Acik'}
                                             </button>
                                         </td>
                                     </tr>

@@ -16,7 +16,7 @@ export default function AdminLayout() {
         { path: '/branch', label: 'Şube & Saatler', icon: MapPin },
         { path: '/audit', label: 'Denetim Günlüğü', icon: Shield },
         { path: '/feedbacks', label: 'Geri Bildirimler', icon: MessageSquare },
-        { path: '/errors', label: 'Error Logs', icon: AlertTriangle },
+        { path: '/errors', label: 'Hata Kayıtları', icon: AlertTriangle },
         { path: '/settings', label: 'Ayarlar', icon: Settings },
     ];
 
