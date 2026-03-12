@@ -3,22 +3,22 @@ import { AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
 import { getErrorLogs, updateErrorResolved } from '../services/errorService';
 
 const SOURCE_OPTIONS = [
-    { value: 'all', label: 'Tum Kaynaklar' },
+    { value: 'all', label: 'Tüm Kaynaklar' },
     { value: 'app', label: 'Uygulama' },
     { value: 'admin', label: 'Admin Paneli' },
     { value: 'backend', label: 'Backend' }
 ];
 
 const SEVERITY_OPTIONS = [
-    { value: 'all', label: 'Tum Seviyeler' },
+    { value: 'all', label: 'Tüm Seviyeler' },
     { value: 'error', label: 'Hata' },
-    { value: 'warning', label: 'Uyari' }
+    { value: 'warning', label: 'Uyarı' }
 ];
 
 const RESOLUTION_OPTIONS = [
-    { value: 'all', label: 'Tum Durumlar' },
-    { value: 'open', label: 'Acik' },
-    { value: 'resolved', label: 'Cozuldu' }
+    { value: 'all', label: 'Tüm Durumlar' },
+    { value: 'open', label: 'Açık' },
+    { value: 'resolved', label: 'Çözüldü' }
 ];
 
 export default function AdminErrors() {
@@ -86,9 +86,9 @@ export default function AdminErrors() {
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-widest uppercase mb-2 flex items-center gap-3">
                         <AlertTriangle className="text-shaco-red" size={30} />
-                        Hata Kayitlari
+                        Hata Kayıtları
                     </h1>
-                    <p className="text-zinc-400 font-medium">Uygulama, admin paneli ve backend kaynakli calisma zamani hatalari.</p>
+                    <p className="text-zinc-400 font-medium">Uygulama, admin paneli ve backend kaynaklı çalışma zamanı hataları.</p>
                 </div>
                 <button
                     onClick={loadLogs}
@@ -133,7 +133,7 @@ export default function AdminErrors() {
                 <input
                     value={filters.search}
                     onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-                    placeholder="Mesaj, rota, kullanici ara..."
+                    placeholder="Mesaj, rota, kullanıcı ara..."
                     className="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 md:col-span-2"
                 />
             </form>
@@ -156,13 +156,13 @@ export default function AdminErrors() {
                                 <tr>
                                     <td colSpan="6" className="p-12 text-center text-zinc-500">
                                         <Loader2 size={32} className="animate-spin mx-auto mb-4 text-shaco-red" />
-                                        Kayitlar yukleniyor...
+                                        Kayıtlar yükleniyor...
                                     </td>
                                 </tr>
                             ) : logs.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="p-12 text-center text-zinc-500">
-                                        Secilen filtrelere uygun hata kaydi bulunamadi.
+                                        Seçilen filtrelere uygun hata kaydı bulunamadı.
                                     </td>
                                 </tr>
                             ) : (
@@ -195,7 +195,7 @@ export default function AdminErrors() {
                                                     : 'bg-zinc-900 border-white/10 text-zinc-200 hover:border-shaco-red'
                                                     } disabled:opacity-60`}
                                             >
-                                                {updatingIds[log.id] ? '...' : log.resolved ? 'Cozuldu' : 'Acik'}
+                                                {updatingIds[log.id] ? '...' : log.resolved ? 'Çözüldü' : 'Açık'}
                                             </button>
                                         </td>
                                     </tr>
