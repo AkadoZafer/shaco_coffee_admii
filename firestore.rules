@@ -2,35 +2,30 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Global kontrol: user dökümanını okuyup 'admin' rolünü doğrular
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     function isAdmin() {
-      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
     
-    // Sadece admin üyeleri değiştirebilir
     match /users/{userId} {
-      allow read, write: if isAdmin();
-      
-      // Kullanıcı kendi dökümanını okuyabilir
-      allow read: if request.auth != null && request.auth.uid == userId;
-      
-      // Kullanıcı kendi dökümanını yaratabilir ama 'admin' rolünü koyamaz
-      allow create: if request.auth != null 
-                    && request.auth.uid == userId
-                    && request.resource.data.role != 'admin';
-                    
-      // Kullanıcı dökümanını güncelleyebilir ama kritik alanlara DOKUNAMAZ!
-      // role: Yetki yükseltme saldırısı engeli
-      // balance: Bakiye manipülasyonu engeli
-      // stars / tier: Sadakat programı hilesi engeli
-      allow update: if request.auth != null 
-                    && request.auth.uid == userId
+      allow read: if isSelf(userId) || isAdmin();
+      allow create: if isSelf(userId)
+                    && (!request.resource.data.keys().hasAll(['role']) || request.resource.data.role != 'admin');
+      allow update: if isSelf(userId)
                     && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'balance', 'stars', 'tier']));
+      allow delete: if isAdmin();
     }
 
     match /menu/{document=**} {
-      allow read: if true; // Tüm müşteriler görebilir
-      allow write: if isAdmin(); // Sadece admin değiştirebilir
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /stories/{document=**} {
@@ -53,10 +48,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Backend (Fastify Admin SDK) tarafından yönetilen koleksiyonlar
-    // Client (Web App/Admin Panel) tarafında doğrudan Okuma/Yazma KESİNLİKLE YASAKTIR.
     match /qr_tokens/{document=**} {
       allow read, write: if false;
+    }
+
+    match /auditLogs/{document=**} {
+       allow read: if isAdmin();
+       allow write: if isAdmin();
     }
 
     match /audit_logs/{document=**} {
@@ -64,21 +62,50 @@ service cloud.firestore {
        allow write: if isAdmin();
     }
 
-    match /error_logs/{document=**} {
+    match /error_logs/{errorId} {
       allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasOnly([
+          'source',
+          'severity',
+          'message',
+          'stack',
+          'route',
+          'userId',
+          'userAgent',
+          'appVersion',
+          'createdAt',
+          'resolved'
+        ])
+        && request.resource.data.source in ['app', 'admin']
+        && request.resource.data.severity in ['error', 'warning']
+        && request.resource.data.message is string
+        && request.resource.data.stack is string
+        && request.resource.data.route is string
+        && request.resource.data.userAgent is string
+        && request.resource.data.appVersion is string
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.resolved == false
+        && (
+          !('userId' in request.resource.data)
+          || request.resource.data.userId == null
+          || request.resource.data.userId == request.auth.uid
+        );
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['resolved'])
+        && request.resource.data.resolved is bool;
+      allow delete: if false;
     }
 
-    // Sipariş koleksiyonu — kullanıcı kendi siparişlerini görebilir, admin hepsini görebilir
     match /orders/{orderId} {
-      allow read: if request.auth != null;
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
     match /feedbacks/{id} {
-      allow create: if request.auth != null;
+      allow create: if isSignedIn();
       allow read: if isAdmin();
-      allow write: if false;
+      allow update, delete: if false;
     }
 
     match /categories/{document=**} {
