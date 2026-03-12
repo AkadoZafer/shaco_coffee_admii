@@ -7,20 +7,28 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function isSelf(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
+
     match /users/{userId} {
       allow read: if isSelf(userId) || isAdmin();
+
       allow create: if isSelf(userId)
-                    && (!request.resource.data.keys().hasAll(['role']) || request.resource.data.role != 'admin');
+        && (!request.resource.data.keys().hasAll(['role']) || request.resource.data.role != 'admin');
+
       allow update: if isSelf(userId)
-                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'balance', 'stars', 'tier']));
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'balance', 'stars', 'tier']);
+
       allow delete: if isAdmin();
+    }
+
+    match /users/{document=**} {
+      allow read: if isAdmin();
     }
 
     match /menu/{document=**} {
@@ -37,33 +45,58 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
-    
+
     match /branches/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
-    
+
     match /settings/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
+    match /orders/{document=**} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /feedbacks/{docId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    match /categories/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Audit collection (legacy + current naming safe)
+    match /auditLogs/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    match /audit_logs/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Backend-only sensitive collection
     match /qr_tokens/{document=**} {
       allow read, write: if false;
     }
 
-    match /auditLogs/{document=**} {
-       allow read: if isAdmin();
-       allow write: if isAdmin();
-    }
-
-    match /audit_logs/{document=**} {
-       allow read: if isAdmin();
-       allow write: if isAdmin();
-    }
-
+    // Firebase-native error tracking
     match /error_logs/{errorId} {
+      // Admin panel listing
       allow read: if isAdmin();
+
+      // App/Admin client create (backend Admin SDK rules bypass eder)
       allow create: if isSignedIn()
         && request.resource.data.keys().hasOnly([
           'source',
@@ -91,26 +124,13 @@ service cloud.firestore {
           || request.resource.data.userId == null
           || request.resource.data.userId == request.auth.uid
         );
+
+      // Admin only: resolved toggle
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['resolved'])
         && request.resource.data.resolved is bool;
+
       allow delete: if false;
-    }
-
-    match /orders/{orderId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin();
-    }
-
-    match /feedbacks/{id} {
-      allow create: if isSignedIn();
-      allow read: if isAdmin();
-      allow update, delete: if false;
-    }
-
-    match /categories/{document=**} {
-      allow read: if true;
-      allow write: if isAdmin();
     }
   }
 }
