@@ -25,6 +25,7 @@ export default function AdminErrors() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updatingIds, setUpdatingIds] = useState({});
+    const [selectedLog, setSelectedLog] = useState(null);
     const [filters, setFilters] = useState({
         source: 'all',
         severity: 'all',
@@ -167,7 +168,11 @@ export default function AdminErrors() {
                                 </tr>
                             ) : (
                                 logs.map((log) => (
-                                    <tr key={log.id} className="hover:bg-white/5 transition-colors align-top">
+                                    <tr
+                                        key={log.id}
+                                        className="hover:bg-white/5 transition-colors align-top cursor-pointer"
+                                        onClick={() => setSelectedLog(log)}
+                                    >
                                         <td className="p-4 pl-6 text-sm text-zinc-400 whitespace-nowrap">
                                             {formatDate(log.createdAt)}
                                         </td>
@@ -188,7 +193,10 @@ export default function AdminErrors() {
                                         <td className="p-4 text-sm text-zinc-400 break-all">{log.route || '-'}</td>
                                         <td className="p-4">
                                             <button
-                                                onClick={() => void toggleResolved(log)}
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    void toggleResolved(log);
+                                                }}
                                                 disabled={!!updatingIds[log.id]}
                                                 className={`min-w-24 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${log.resolved
                                                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
@@ -205,6 +213,45 @@ export default function AdminErrors() {
                     </table>
                 </div>
             </div>
+
+            {selectedLog ? (
+                <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4 flex items-center justify-center">
+                    <div className="w-full max-w-3xl bg-[#0d0d12] border border-white/10 rounded-2xl p-5 md:p-6">
+                        <div className="flex items-start justify-between gap-4 mb-4">
+                            <div>
+                                <h3 className="text-xl font-black tracking-wide text-white">Hata Detayı</h3>
+                                <p className="text-xs text-zinc-400 mt-1">Kayıt ID: {selectedLog.id}</p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedLog(null)}
+                                className="px-3 py-1.5 rounded-lg text-sm font-bold bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+                            >
+                                Kapat
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-sm">
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3"><span className="text-zinc-500">Tarih:</span> <span className="text-zinc-200">{formatDate(selectedLog.createdAt)}</span></div>
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3"><span className="text-zinc-500">Kaynak:</span> <span className="text-zinc-200 uppercase">{selectedLog.source || '-'}</span></div>
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3"><span className="text-zinc-500">Seviye:</span> <span className="text-zinc-200">{selectedLog.severity || '-'}</span></div>
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3"><span className="text-zinc-500">Durum:</span> <span className="text-zinc-200">{selectedLog.resolved ? 'Çözüldü' : 'Açık'}</span></div>
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3 md:col-span-2 break-all"><span className="text-zinc-500">Rota:</span> <span className="text-zinc-200">{selectedLog.route || '-'}</span></div>
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3 md:col-span-2 break-all"><span className="text-zinc-500">Kullanıcı:</span> <span className="text-zinc-200">{selectedLog.userId || '-'}</span></div>
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3 md:col-span-2 break-all"><span className="text-zinc-500">Uygulama Versiyonu:</span> <span className="text-zinc-200">{selectedLog.appVersion || '-'}</span></div>
+                            <div className="bg-black/30 rounded-lg border border-white/5 p-3 md:col-span-2 break-all"><span className="text-zinc-500">User Agent:</span> <span className="text-zinc-200">{selectedLog.userAgent || '-'}</span></div>
+                        </div>
+
+                        <div className="mb-3">
+                            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">Mesaj</p>
+                            <pre className="text-sm text-zinc-200 bg-black/40 border border-white/5 rounded-lg p-3 whitespace-pre-wrap break-words">{selectedLog.message || '-'}</pre>
+                        </div>
+                        <div>
+                            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">Stack Trace</p>
+                            <pre className="text-xs text-zinc-300 bg-black/40 border border-white/5 rounded-lg p-3 max-h-56 overflow-auto whitespace-pre-wrap break-words">{selectedLog.stack || '-'}</pre>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }
