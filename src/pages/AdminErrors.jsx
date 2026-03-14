@@ -26,6 +26,7 @@ export default function AdminErrors() {
     const [loading, setLoading] = useState(true);
     const [updatingIds, setUpdatingIds] = useState({});
     const [selectedLog, setSelectedLog] = useState(null);
+    const [copiedField, setCopiedField] = useState('');
     const [filters, setFilters] = useState({
         source: 'all',
         severity: 'all',
@@ -79,6 +80,28 @@ export default function AdminErrors() {
             hour: '2-digit',
             minute: '2-digit'
         }).format(date);
+    };
+
+    const formatRelativeTime = (timestamp) => {
+        if (!timestamp) return '-';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const diffMs = Date.now() - date.getTime();
+        const diffMin = Math.max(1, Math.floor(diffMs / 60000));
+        if (diffMin < 60) return `${diffMin} dk önce`;
+        const diffHour = Math.floor(diffMin / 60);
+        if (diffHour < 24) return `${diffHour} sa önce`;
+        const diffDay = Math.floor(diffHour / 24);
+        return `${diffDay} gün önce`;
+    };
+
+    const copyToClipboard = async (label, value) => {
+        try {
+            await navigator.clipboard.writeText(value || '');
+            setCopiedField(label);
+            setTimeout(() => setCopiedField(''), 1500);
+        } catch (error) {
+            console.error('Clipboard write failed:', error);
+        }
     };
 
     return (
@@ -139,6 +162,27 @@ export default function AdminErrors() {
                 />
             </form>
 
+            <div className="flex flex-wrap gap-2 mb-4">
+                <button
+                    onClick={() => setFilters((prev) => ({ ...prev, resolved: 'open' }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${filters.resolved === 'open'
+                        ? 'bg-shaco-red/20 border-shaco-red/40 text-red-200'
+                        : 'bg-zinc-900 border-white/10 text-zinc-300'
+                        }`}
+                >
+                    Sadece Açıklar
+                </button>
+                <button
+                    onClick={() => setFilters((prev) => ({ ...prev, resolved: 'all' }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border ${filters.resolved === 'all'
+                        ? 'bg-zinc-700 border-zinc-500 text-white'
+                        : 'bg-zinc-900 border-white/10 text-zinc-300'
+                        }`}
+                >
+                    Tüm Kayıtlar
+                </button>
+            </div>
+
             <div className="glass rounded-3xl overflow-hidden border border-white/5">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -174,7 +218,8 @@ export default function AdminErrors() {
                                         onClick={() => setSelectedLog(log)}
                                     >
                                         <td className="p-4 pl-6 text-sm text-zinc-400 whitespace-nowrap">
-                                            {formatDate(log.createdAt)}
+                                            <div>{formatDate(log.createdAt)}</div>
+                                            <div className="text-xs text-zinc-600 mt-1">{formatRelativeTime(log.createdAt)}</div>
                                         </td>
                                         <td className="p-4 text-sm font-semibold text-zinc-300 uppercase">{log.source || '-'}</td>
                                         <td className="p-4">
@@ -242,11 +287,27 @@ export default function AdminErrors() {
                         </div>
 
                         <div className="mb-3">
-                            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">Mesaj</p>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                                <p className="text-xs uppercase tracking-wider text-zinc-500">Mesaj</p>
+                                <button
+                                    onClick={() => void copyToClipboard('message', selectedLog.message)}
+                                    className="px-2 py-1 rounded-md text-[11px] font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                                >
+                                    {copiedField === 'message' ? 'Kopyalandı' : 'Kopyala'}
+                                </button>
+                            </div>
                             <pre className="text-sm text-zinc-200 bg-black/40 border border-white/5 rounded-lg p-3 whitespace-pre-wrap break-words">{selectedLog.message || '-'}</pre>
                         </div>
                         <div>
-                            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2">Stack Trace</p>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                                <p className="text-xs uppercase tracking-wider text-zinc-500">Stack Trace</p>
+                                <button
+                                    onClick={() => void copyToClipboard('stack', selectedLog.stack)}
+                                    className="px-2 py-1 rounded-md text-[11px] font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                                >
+                                    {copiedField === 'stack' ? 'Kopyalandı' : 'Kopyala'}
+                                </button>
+                            </div>
                             <pre className="text-xs text-zinc-300 bg-black/40 border border-white/5 rounded-lg p-3 max-h-56 overflow-auto whitespace-pre-wrap break-words">{selectedLog.stack || '-'}</pre>
                         </div>
                     </div>
