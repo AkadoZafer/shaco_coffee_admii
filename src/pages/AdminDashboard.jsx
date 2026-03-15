@@ -1,12 +1,28 @@
-import { DollarSign, QrCode, Users, Clock, ArrowUp, Package } from 'lucide-react';
+import { DollarSign, QrCode, Users, Clock, ArrowUp, Package, RefreshCw, Gift, CalendarDays } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { subscribeProducts } from '../services/productService';
 import { subscribeMembers } from '../services/memberService';
 import { subscribeCampaigns } from '../services/campaignService';
+import { runMarketingAutomation, subscribeKpiMetrics } from '../services/kpiMarketingService';
 import SeedButton from '../components/SeedButton';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({ products: 0, members: 0, campaigns: 0, outOfStock: 0 });
+    const [kpis, setKpis] = useState({
+        dailyOrders: 0,
+        dailyRevenue: 0,
+        avgBasket: 0,
+        repeatRate7d: 0,
+        repeatRate30d: 0,
+    });
+    const [automationConfig, setAutomationConfig] = useState({
+        winbackEnabled: true,
+        winbackDiscountPercent: 15,
+        birthdayEnabled: true,
+        birthdayDiscountPercent: 20
+    });
+    const [automationRunning, setAutomationRunning] = useState(false);
+    const [automationResult, setAutomationResult] = useState(null);
 
     useEffect(() => {
         const unsubProducts = subscribeProducts(data => {
@@ -19,12 +35,41 @@ export default function AdminDashboard() {
         return () => { unsubProducts(); unsubMembers(); unsubCampaigns(); };
     }, []);
 
+    useEffect(() => {
+        const unsubscribe = subscribeKpiMetrics((metrics) => {
+            setKpis({
+                dailyOrders: metrics.dailyOrders,
+                dailyRevenue: metrics.dailyRevenue,
+                avgBasket: metrics.avgBasket,
+                repeatRate7d: metrics.repeatRate7d,
+                repeatRate30d: metrics.repeatRate30d
+            });
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const handleRunAutomation = async () => {
+        if (automationRunning) return;
+
+        setAutomationRunning(true);
+        try {
+            const result = await runMarketingAutomation(automationConfig);
+            setAutomationResult(result);
+        } catch (error) {
+            console.error('Marketing automation failed:', error);
+            alert(`Otomasyon çalıştırılamadı: ${error.message}`);
+        } finally {
+            setAutomationRunning(false);
+        }
+    };
+
     return (
         <div className="max-w-7xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-wide">Genel Bakış</h1>
-                    <p className="text-zinc-400 mt-1">Sistem istatistikleri ve genel raporlar (Simüle edilmiş veriler ve canlı sayımlar).</p>
+                    <p className="text-zinc-400 mt-1">Canlı KPI metrikleri ve otomatik pazarlama akışları.</p>
                 </div>
                 <SeedButton />
             </div>
@@ -39,7 +84,7 @@ export default function AdminDashboard() {
                         <span className="text-sm font-bold text-zinc-400">Toplam Üye</span>
                     </div>
                     <h3 className="text-3xl font-black text-white mb-2">{stats.members}</h3>
-                    <p className="text-emerald-500 text-xs font-bold flex items-center gap-1"><ArrowUp size={12} /> +12% dün</p>
+                    <p className="text-zinc-500 text-xs font-bold flex items-center gap-1">Canlı kullanıcı sayımı</p>
                 </div>
 
                 <div className="glass p-6 rounded-3xl relative overflow-hidden group hover:border-white/10 transition-colors">
@@ -48,10 +93,10 @@ export default function AdminDashboard() {
                         <div className="w-10 h-10 rounded-xl bg-shaco-red/10 text-shaco-red flex items-center justify-center">
                             <QrCode size={20} />
                         </div>
-                        <span className="text-sm font-bold text-zinc-400">Bugünkü İşlem (Örnek)</span>
+                        <span className="text-sm font-bold text-zinc-400">Bugünkü İşlem</span>
                     </div>
-                    <h3 className="text-3xl font-black text-white mb-2">142</h3>
-                    <p className="text-emerald-500 text-xs font-bold flex items-center gap-1"><ArrowUp size={12} /> +5% dün</p>
+                    <h3 className="text-3xl font-black text-white mb-2">{kpis.dailyOrders}</h3>
+                    <p className="text-emerald-500 text-xs font-bold flex items-center gap-1"><ArrowUp size={12} /> Canlı sipariş akışı</p>
                 </div>
 
                 <div className="glass p-6 rounded-3xl relative overflow-hidden group hover:border-white/10 transition-colors">
@@ -72,59 +117,139 @@ export default function AdminDashboard() {
                     <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-xl group-hover:bg-orange-500/20 transition-colors"></div>
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
-                            <Clock size={20} />
+                            <DollarSign size={20} />
                         </div>
-                        <span className="text-sm font-bold text-zinc-400">Aktif Kampanya</span>
+                        <span className="text-sm font-bold text-zinc-400">Bugünkü Ciro</span>
                     </div>
-                    <h3 className="text-3xl font-black text-white mb-2">{stats.campaigns}</h3>
-                    <p className="text-zinc-500 text-xs font-bold flex items-center gap-1">Yayında olan duyurular</p>
+                    <h3 className="text-3xl font-black text-white mb-2">₺{kpis.dailyRevenue}</h3>
+                    <p className="text-zinc-500 text-xs font-bold flex items-center gap-1">Gün içi canlı toplam</p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="glass p-6 rounded-3xl">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                            <DollarSign size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-zinc-400">Ortalama Sepet</span>
+                    </div>
+                    <h3 className="text-3xl font-black text-white">₺{kpis.avgBasket}</h3>
+                    <p className="text-zinc-500 text-xs font-bold mt-2">Günlük sipariş bazında ortalama</p>
+                </div>
+
+                <div className="glass p-6 rounded-3xl">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                            <Clock size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-zinc-400">Tekrar Sipariş (7 Gün)</span>
+                    </div>
+                    <h3 className="text-3xl font-black text-white">%{kpis.repeatRate7d}</h3>
+                    <p className="text-zinc-500 text-xs font-bold mt-2">Aynı dönemde 2+ sipariş veren oranı</p>
+                </div>
+
+                <div className="glass p-6 rounded-3xl">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                            <CalendarDays size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-zinc-400">Tekrar Sipariş (30 Gün)</span>
+                    </div>
+                    <h3 className="text-3xl font-black text-white">%{kpis.repeatRate30d}</h3>
+                    <p className="text-zinc-500 text-xs font-bold mt-2">Aylık müşteri sadakati görünümü</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                    <h3 className="text-lg font-bold text-white mb-4">Popüler Ürünler (Örnek Veri)</h3>
-                    <div className="glass rounded-3xl overflow-hidden shadow-2xl">
-                        {[
-                            { name: 'Lotus Biscoff Latte', sales: 342, bg: 'bg-orange-500' },
-                            { name: "The Jester's Delight", sales: 289, bg: 'bg-shaco-red' },
-                            { name: 'Iced Caramel Macchiato', sales: 215, bg: 'bg-amber-400' },
-                            { name: 'Cold Brew', sales: 180, bg: 'bg-blue-400' }
-                        ].map((item, i) => (
-                            <div key={i} className="px-6 py-4 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white ${item.bg}`}>
-                                        #{i + 1}
-                                    </div>
-                                    <span className="font-bold text-white tracking-wide">{item.name}</span>
-                                </div>
-                                <span className="text-sm font-bold text-zinc-400 bg-black/50 px-3 py-1 rounded-lg border border-white/5">{item.sales} Satış</span>
+                <div className="glass rounded-3xl p-6">
+                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <Gift size={18} className="text-emerald-400" />
+                        Otomatik Pazarlama Akışları
+                    </h3>
+                    <div className="space-y-4">
+                        <label className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5">
+                            <div>
+                                <p className="text-sm font-bold text-white">30 Gün Pasif Kullanıcı Kuponu</p>
+                                <p className="text-xs text-zinc-500">30 gün sipariş vermeyen üyeleri hedefler.</p>
                             </div>
-                        ))}
+                            <input
+                                type="checkbox"
+                                checked={automationConfig.winbackEnabled}
+                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, winbackEnabled: e.target.checked }))}
+                                className="w-5 h-5 accent-emerald-500"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5">
+                            <span className="text-sm text-zinc-300">% İndirim</span>
+                            <input
+                                type="number"
+                                min="5"
+                                max="60"
+                                value={automationConfig.winbackDiscountPercent}
+                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, winbackDiscountPercent: Number(e.target.value) || 0 }))}
+                                className="w-24 bg-zinc-900 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5">
+                            <div>
+                                <p className="text-sm font-bold text-white">Doğum Günü Kuponu</p>
+                                <p className="text-xs text-zinc-500">Bugün doğum günü olan üyeleri hedefler.</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={automationConfig.birthdayEnabled}
+                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, birthdayEnabled: e.target.checked }))}
+                                className="w-5 h-5 accent-purple-500"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between p-4 rounded-2xl bg-black/30 border border-white/5">
+                            <span className="text-sm text-zinc-300">% İndirim</span>
+                            <input
+                                type="number"
+                                min="5"
+                                max="60"
+                                value={automationConfig.birthdayDiscountPercent}
+                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, birthdayDiscountPercent: Number(e.target.value) || 0 }))}
+                                className="w-24 bg-zinc-900 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm"
+                            />
+                        </label>
+
+                        <button
+                            onClick={handleRunAutomation}
+                            disabled={automationRunning}
+                            className="w-full mt-2 bg-shaco-red hover:bg-red-600 disabled:opacity-60 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all"
+                        >
+                            <RefreshCw size={16} className={automationRunning ? 'animate-spin' : ''} />
+                            {automationRunning ? 'Akış çalıştırılıyor...' : 'Akışları Şimdi Çalıştır'}
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <h3 className="text-lg font-bold text-white mb-4">Son İşlemler (Örnek Veri)</h3>
-                    <div className="glass rounded-3xl overflow-hidden shadow-2xl p-2">
-                        {[
-                            { user: 'Ahmet Yılmaz', type: 'QR Ödeme', amount: '120₺', time: '5 dk önce' },
-                            { user: 'Ayşe Demir', type: 'Puan Harcama', amount: '-15 Yıldız', time: '12 dk önce' },
-                            { user: 'Mehmet K.', type: 'Cüzdana Yükleme', amount: '500₺', time: '1 saat önce' },
-                            { user: 'Zeynep Ç.', type: 'QR Ödeme', amount: '85₺', time: '2 saat önce' }
-                        ].map((txn, i) => (
-                            <div key={i} className="px-4 py-3 flex items-center justify-between hover:bg-white/5 transition-colors rounded-2xl">
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-white text-sm">{txn.user}</span>
-                                    <span className="text-xs text-zinc-500">{txn.type}</span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <span className={`font-bold text-sm ${txn.amount.includes('-') ? 'text-shaco-red' : 'text-emerald-500'}`}>{txn.amount}</span>
-                                    <span className="text-xs text-zinc-600 font-medium">{txn.time}</span>
-                                </div>
+                <div className="glass rounded-3xl p-6">
+                    <h3 className="text-lg font-bold text-white mb-4">Akış Sonucu</h3>
+                    {automationResult ? (
+                        <div className="space-y-3">
+                            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                                <p className="text-sm text-emerald-300 font-bold">30 Gün Pasif Hedef Sayısı</p>
+                                <p className="text-3xl font-black text-white">{automationResult.winbackCount}</p>
                             </div>
-                        ))}
-                    </div>
+                            <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+                                <p className="text-sm text-purple-300 font-bold">Doğum Günü Hedef Sayısı</p>
+                                <p className="text-3xl font-black text-white">{automationResult.birthdayCount}</p>
+                            </div>
+                            <p className="text-xs text-zinc-500">
+                                Aynı gün içinde aynı otomasyon tipi tekrar kampanya üretmez.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="h-full min-h-48 rounded-2xl border border-dashed border-white/10 flex items-center justify-center text-zinc-500 text-sm">
+                            Akış henüz çalıştırılmadı.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
