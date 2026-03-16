@@ -1,8 +1,10 @@
 import {
     addDoc,
     collection,
+    doc,
     getDocs,
     onSnapshot,
+    setDoc,
     serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -74,14 +76,16 @@ export const subscribeKpiMetrics = (callback) => {
         const dailyRevenue = todaysOrders.reduce((sum, order) => sum + (order.total || 0), 0);
         const avgBasket = dailyOrders > 0 ? Math.round(dailyRevenue / dailyOrders) : 0;
 
-        callback({
+        const payload = {
             dailyOrders,
             dailyRevenue,
             avgBasket,
             repeatRate7d: getRepeatRate(state.orders, 7),
             repeatRate30d: getRepeatRate(state.orders, 30),
             totalUsers: state.users.length
-        });
+        };
+
+        callback(payload);
     };
 
     const unsubOrders = onSnapshot(collection(db, ORDERS_COLLECTION), (snapshot) => {
@@ -237,9 +241,19 @@ export const runMarketingAutomation = async ({
         `Otomasyon çalıştı. 30g pasif: ${winbackCount}, doğum günü: ${birthdayCount}`
     );
 
-    return {
+    const summary = {
         winbackCount,
         birthdayCount,
-        createdCampaignIds
+        createdCampaignIds,
+        ranAt: Date.now(),
+        ranAtIso: new Date().toISOString()
     };
+
+    await setDoc(
+        doc(db, 'settings', 'general'),
+        { marketingAutomationLastRun: summary },
+        { merge: true }
+    );
+
+    return summary;
 };

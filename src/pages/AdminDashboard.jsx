@@ -1,10 +1,12 @@
 import { DollarSign, QrCode, Users, Clock, ArrowUp, Package, RefreshCw, Gift, CalendarDays } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { subscribeProducts } from '../services/productService';
 import { subscribeMembers } from '../services/memberService';
 import { subscribeCampaigns } from '../services/campaignService';
 import { runMarketingAutomation, subscribeKpiMetrics } from '../services/kpiMarketingService';
 import SeedButton from '../components/SeedButton';
+import { db } from '../firebase';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({ products: 0, members: 0, campaigns: 0, outOfStock: 0 });
@@ -47,6 +49,17 @@ export default function AdminDashboard() {
         });
 
         return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const unsub = onSnapshot(doc(db, 'settings', 'general'), (snap) => {
+            const data = snap.exists() ? snap.data() : null;
+            const saved = data?.marketingAutomationLastRun || null;
+            if (saved) {
+                setAutomationResult(saved);
+            }
+        });
+        return () => unsub();
     }, []);
 
     const handleRunAutomation = async () => {
