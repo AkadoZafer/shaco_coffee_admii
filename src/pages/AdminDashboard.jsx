@@ -29,6 +29,9 @@ export default function AdminDashboard() {
     const [automationResult, setAutomationResult] = useState(null);
     const settingsDocRef = doc(db, 'settings', 'general');
     const hasAnyAutomationEnabled = automationConfig.winbackEnabled || automationConfig.birthdayEnabled;
+    const lastRunLabel = automationResult?.ranAt
+        ? new Date(automationResult.ranAt).toLocaleString('tr-TR')
+        : (automationResult?.ranAtIso ? new Date(automationResult.ranAtIso).toLocaleString('tr-TR') : null);
 
     useEffect(() => {
         const unsubProducts = subscribeProducts(data => {
@@ -270,7 +273,15 @@ export default function AdminDashboard() {
 
                 <div className="glass rounded-3xl p-6">
                     <h3 className="text-lg font-bold text-white mb-4">Akış Sonucu</h3>
-                    {automationResult ? (
+                    {!hasAnyAutomationEnabled ? (
+                        <div className="h-full min-h-48 rounded-2xl border border-dashed border-white/10 flex flex-col items-center justify-center text-zinc-500 text-sm text-center px-4">
+                            <p className="text-zinc-300 font-semibold">Akışlar şu anda kapalı.</p>
+                            <p className="mt-1">Yeniden çalıştırmak için soldan en az bir akışı aç.</p>
+                            {lastRunLabel ? (
+                                <p className="mt-3 text-xs text-zinc-500">Son çalıştırma: {lastRunLabel}</p>
+                            ) : null}
+                        </div>
+                    ) : automationResult ? (
                         <div className="space-y-3">
                             <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                                 <p className="text-sm text-emerald-300 font-bold">30 Gün Pasif Hedef Sayısı</p>
@@ -283,6 +294,9 @@ export default function AdminDashboard() {
                             <p className="text-xs text-zinc-500">
                                 Aynı gün içinde aynı otomasyon tipi tekrar kampanya üretmez.
                             </p>
+                            {lastRunLabel ? (
+                                <p className="text-xs text-zinc-500">Son çalıştırma: {lastRunLabel}</p>
+                            ) : null}
                         </div>
                     ) : (
                         <div className="h-full min-h-48 rounded-2xl border border-dashed border-white/10 flex items-center justify-center text-zinc-500 text-sm">

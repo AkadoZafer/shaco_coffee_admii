@@ -48,8 +48,8 @@ function App() {
               </Route>
             </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            {/* Default-deny fallback: unknown routes go to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
