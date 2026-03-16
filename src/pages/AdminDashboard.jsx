@@ -1,12 +1,19 @@
 import { DollarSign, QrCode, Users, Clock, ArrowUp, Package, RefreshCw, Gift, CalendarDays } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { subscribeProducts } from '../services/productService';
 import { subscribeMembers } from '../services/memberService';
 import { subscribeCampaigns } from '../services/campaignService';
 import { runMarketingAutomation, subscribeKpiMetrics } from '../services/kpiMarketingService';
 import SeedButton from '../components/SeedButton';
 import { db } from '../firebase';
+
+const DEFAULT_AUTOMATION_CONFIG = {
+    winbackEnabled: true,
+    winbackDiscountPercent: 15,
+    birthdayEnabled: true,
+    birthdayDiscountPercent: 20
+};
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({ products: 0, members: 0, campaigns: 0, outOfStock: 0 });
@@ -17,14 +24,11 @@ export default function AdminDashboard() {
         repeatRate7d: 0,
         repeatRate30d: 0,
     });
-    const [automationConfig, setAutomationConfig] = useState({
-        winbackEnabled: true,
-        winbackDiscountPercent: 15,
-        birthdayEnabled: true,
-        birthdayDiscountPercent: 20
-    });
+    const [automationConfig, setAutomationConfig] = useState(DEFAULT_AUTOMATION_CONFIG);
     const [automationRunning, setAutomationRunning] = useState(false);
     const [automationResult, setAutomationResult] = useState(null);
+    const settingsDocRef = doc(db, 'settings', 'general');
+    const hasAnyAutomationEnabled = automationConfig.winbackEnabled || automationConfig.birthdayEnabled;
 
     useEffect(() => {
         const unsubProducts = subscribeProducts(data => {
@@ -52,15 +56,35 @@ export default function AdminDashboard() {
     }, []);
 
     useEffect(() => {
-        const unsub = onSnapshot(doc(db, 'settings', 'general'), (snap) => {
+        const unsub = onSnapshot(settingsDocRef, (snap) => {
             const data = snap.exists() ? snap.data() : null;
             const saved = data?.marketingAutomationLastRun || null;
+            const savedConfig = data?.marketingAutomationConfig;
+
             if (saved) {
                 setAutomationResult(saved);
             }
+
+            if (savedConfig && typeof savedConfig === 'object') {
+                setAutomationConfig({
+                    winbackEnabled: typeof savedConfig.winbackEnabled === 'boolean' ? savedConfig.winbackEnabled : DEFAULT_AUTOMATION_CONFIG.winbackEnabled,
+                    winbackDiscountPercent: Number(savedConfig.winbackDiscountPercent) || DEFAULT_AUTOMATION_CONFIG.winbackDiscountPercent,
+                    birthdayEnabled: typeof savedConfig.birthdayEnabled === 'boolean' ? savedConfig.birthdayEnabled : DEFAULT_AUTOMATION_CONFIG.birthdayEnabled,
+                    birthdayDiscountPercent: Number(savedConfig.birthdayDiscountPercent) || DEFAULT_AUTOMATION_CONFIG.birthdayDiscountPercent
+                });
+            }
         });
         return () => unsub();
-    }, []);
+    }, [settingsDocRef]);
+
+    const updateAutomationConfig = (updater) => {
+        setAutomationConfig((prev) => {
+            const next = typeof updater === 'function' ? updater(prev) : updater;
+            void setDoc(settingsDocRef, { marketingAutomationConfig: next }, { merge: true })
+                .catch((error) => console.error('Failed to persist automation config:', error));
+            return next;
+        });
+    };
 
     const handleRunAutomation = async () => {
         if (automationRunning) return;
@@ -189,7 +213,7 @@ export default function AdminDashboard() {
                             <input
                                 type="checkbox"
                                 checked={automationConfig.winbackEnabled}
-                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, winbackEnabled: e.target.checked }))}
+                                onChange={(e) => updateAutomationConfig((prev) => ({ ...prev, winbackEnabled: e.target.checked }))}
                                 className="w-5 h-5 accent-emerald-500"
                             />
                         </label>
@@ -201,7 +225,8 @@ export default function AdminDashboard() {
                                 min="5"
                                 max="60"
                                 value={automationConfig.winbackDiscountPercent}
-                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, winbackDiscountPercent: Number(e.target.value) || 0 }))}
+                                disabled={!automationConfig.winbackEnabled}
+                                onChange={(e) => updateAutomationConfig((prev) => ({ ...prev, winbackDiscountPercent: Number(e.target.value) || 0 }))}
                                 className="w-24 bg-zinc-900 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm"
                             />
                         </label>
@@ -214,7 +239,7 @@ export default function AdminDashboard() {
                             <input
                                 type="checkbox"
                                 checked={automationConfig.birthdayEnabled}
-                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, birthdayEnabled: e.target.checked }))}
+                                onChange={(e) => updateAutomationConfig((prev) => ({ ...prev, birthdayEnabled: e.target.checked }))}
                                 className="w-5 h-5 accent-purple-500"
                             />
                         </label>
@@ -226,18 +251,19 @@ export default function AdminDashboard() {
                                 min="5"
                                 max="60"
                                 value={automationConfig.birthdayDiscountPercent}
-                                onChange={(e) => setAutomationConfig((prev) => ({ ...prev, birthdayDiscountPercent: Number(e.target.value) || 0 }))}
+                                disabled={!automationConfig.birthdayEnabled}
+                                onChange={(e) => updateAutomationConfig((prev) => ({ ...prev, birthdayDiscountPercent: Number(e.target.value) || 0 }))}
                                 className="w-24 bg-zinc-900 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm"
                             />
                         </label>
 
                         <button
                             onClick={handleRunAutomation}
-                            disabled={automationRunning}
+                            disabled={automationRunning || !hasAnyAutomationEnabled}
                             className="w-full mt-2 bg-shaco-red hover:bg-red-600 disabled:opacity-60 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all"
                         >
                             <RefreshCw size={16} className={automationRunning ? 'animate-spin' : ''} />
-                            {automationRunning ? 'Akış çalıştırılıyor...' : 'Akışları Şimdi Çalıştır'}
+                            {automationRunning ? 'Akış çalıştırılıyor...' : hasAnyAutomationEnabled ? 'Akışları Şimdi Çalıştır' : 'Akışlar Kapalı'}
                         </button>
                     </div>
                 </div>
